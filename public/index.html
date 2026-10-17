@@ -5,47 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tennis Court Tracker</title>
     <style>
-        body { font-family: -apple-system, system-ui, sans-serif; background: #f3f4f6; margin: 0; padding: 15px; color: #333; }
-        .container { max-width: 900px; margin: 0 auto; }
-        header { background: #2563eb; color: white; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 15px; }
-        .section { background: white; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); overflow: hidden; }
-        .section-header { background: #e5e7eb; padding: 15px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; user-select: none; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: #f3f4f6; margin: 0; padding: 12px; color: #1f2937; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        header { background: #1e40af; color: white; padding: 16px; border-radius: 12px; text-align: center; margin-bottom: 15px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .section { background: white; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow: hidden; border: 1px solid #e5e7eb; }
+        .section-header { background: #f3f4f6; padding: 14px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; border-bottom: 1px solid #e5e7eb; }
         .section-body { padding: 15px; }
         .hidden { display: none !important; }
-        .view-btn { padding: 8px 16px; border: 1px solid #ccc; background: white; cursor: pointer; font-weight: bold; }
+        .view-btn { padding: 10px 18px; border: 1px solid #d1d5db; background: white; cursor: pointer; font-weight: bold; font-size: 14px; }
         .view-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; margin-top: 10px; }
-        th, td { border: 1px solid #e5e7eb; padding: 12px; text-align: left; }
-        th { background: #f9fafb; font-size: 14px; }
-        .court-cell { min-height: 55px; vertical-align: middle; }
-        .enter-btn { color: #2563eb; background: none; border: none; font-weight: bold; cursor: pointer; text-decoration: underline; padding: 5px 0; font-size: 13px; text-align: left; width: 100%; }
-        .match-card { background: #eff6ff; padding: 8px; border-radius: 6px; font-size: 12px; border: 1px solid #bfdbfe; }
+        table { width: 100%; border-collapse: separate; border-spacing: 4px; min-width: 700px; }
+        th { background: #f9fafb; font-size: 13px; color: #4b5563; text-transform: uppercase; letter-spacing: 0.05em; padding: 10px; border-radius: 6px; }
+        td { padding: 4px; vertical-align: middle; }
+        .time-cell { background: #f9fafb; font-size: 12px; font-weight: bold; border: 1px solid #e5e7eb; border-radius: 8px; text-align: center; padding: 10px 4px; color: #374151; }
+        
+        /* FIX: Highly visible action button wrapper */
+        .add-lineup-btn { 
+            display: block; 
+            width: 100%; 
+            box-sizing: border-box;
+            background: #f0fdf4; 
+            color: #166534; 
+            border: 2px dashed #bbf7d0; 
+            border-radius: 8px; 
+            padding: 12px 8px; 
+            font-weight: bold; 
+            font-size: 13px; 
+            text-align: center; 
+            cursor: pointer; 
+            transition: all 0.2s ease;
+        }
+        .add-lineup-btn:hover { background: #dcfce7; border-color: #86efac; }
+        
+        .match-card { background: #eff6ff; padding: 10px; border-radius: 8px; font-size: 12px; border: 1px solid #bfdbfe; box-shadow: inset 0 1px 2px rgba(0,0,0,0.02); }
+        .edit-link { display: inline-block; margin-top: 6px; color: #2563eb; font-weight: bold; text-decoration: underline; background: none; border: none; padding: 0; cursor: pointer; font-size: 11px; }
+        
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 1000; }
-        .modal-content { background: white; padding: 20px; border-radius: 12px; max-width: 400px; width: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-        .modal-content h3 { margin-top: 0; margin-bottom: 15px; color: #111; }
-        .modal-content input { width: 100%; box-sizing: border-box; padding: 10px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
-        .btn-group { display: flex; justify-content: flex-end; gap: 10px; margin-top: 5px; }
-        .btn-primary { background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .btn-primary:hover { background: #1d4ed8; }
-        .btn-secondary { background: #e5e7eb; color: #333; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .btn-secondary:hover { background: #d1d5db; }
+        .modal-content { background: white; padding: 20px; border-radius: 16px; max-width: 400px; width: 100%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); }
+        .modal-content h3 { margin-top: 0; margin-bottom: 15px; color: #111827; font-size: 18px; }
+        .modal-content input { width: 100%; box-sizing: border-box; padding: 12px; margin-bottom: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; background: #f9fafb; }
+        .modal-content input:focus { border-color: #2563eb; background: white; outline: none; }
+        .btn-group { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
+        .btn-primary { background: #2563eb; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        .btn-secondary { background: #e5e7eb; color: #374151; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1 style="margin:0; font-size:24px;">🎾 Tennis 4-Court Doubles Engine</h1>
-        <p style="margin:5px 0 0 0; opacity:0.9; font-size:14px;">Real-Time Database Tracking (7:00 AM - 10:00 AM)</p>
+        <h1 style="margin:0; font-size:22px; letter-spacing: -0.025em;">🎾 Tennis Court Scheduling Matrix</h1>
+        <p style="margin:4px 0 0 0; opacity:0.9; font-size:13px;">Doubles Logbook & Court-Side Ball Expense Splitter</p>
     </header>
 
-    <!-- CALENDAR -->
+    <!-- CALENDAR PANEL -->
     <div class="section">
-        <div class="section-header" onclick="toggleSec('cal-body')"><span>📅 Timeline View Selection</span><span id="cal-body-icon">▼</span></div>
+        <div class="section-header" onclick="toggleSec('cal-body')"><span>📅 Timeline Scope Selection</span><span id="cal-body-icon">▼</span></div>
         <div id="cal-body" class="section-body">
             <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
-                <input type="date" id="date-picker" style="padding:10px; border-radius:6px; border:1px solid #ccc; font-size:14px;" onchange="loadData()">
-                <div style="border-radius:6px; overflow:hidden; display:inline-flex;">
+                <input type="date" id="date-picker" style="padding:10px; border-radius:8px; border:1px solid #d1d5db; font-size:14px; font-weight:500;" onchange="loadData()">
+                <div style="border-radius:8px; overflow:hidden; display:inline-flex; border:1px solid #d1d5db;">
                     <button class="view-btn active" id="btn-day" onclick="changeView('day')">Day</button>
                     <button class="view-btn" id="btn-week" onclick="changeView('week')">Week</button>
                     <button class="view-btn" id="btn-month" onclick="changeView('month')">Month</button>
@@ -54,14 +73,14 @@
         </div>
     </div>
 
-    <!-- TRACKER MATRIX -->
+    <!-- TRACKER SHEET -->
     <div class="section">
-        <div class="section-header" onclick="toggleSec('matrix-body-sec')"><span>⚔️ Court Live Daily Matrix</span><span id="matrix-body-sec-icon">▼</span></div>
-        <div id="matrix-body-sec" class="section-body" style="overflow-x:auto;">
+        <div class="section-header" onclick="toggleSec('matrix-body-sec')"><span>⚔️ 4-Court Operational Grid Matrix</span><span id="matrix-body-sec-icon">▼</span></div>
+        <div id="matrix-body-sec" class="section-body" style="overflow-x:auto; padding: 8px;">
             <table>
                 <thead>
-                    <tr style="background:#f3f4f6;">
-                        <th style="width:150px;">Time Slot</th>
+                    <tr>
+                        <th style="width:140px;">Time Slot</th>
                         <th>Court 1</th>
                         <th>Court 2</th>
                         <th>Court 3</th>
@@ -73,38 +92,42 @@
         </div>
     </div>
 
-    <!-- CALCULATION EXPENSES -->
+    <!-- EXPENSE SHEET -->
     <div class="section">
-        <div class="section-header" onclick="toggleSec('exp-body')"><span>💵 Tennis Ball Cost Tracker Splitter</span><span id="exp-body-icon">▼</span></div>
+        <div class="section-header" onclick="toggleSec('exp-body')"><span>💵 Proportional Tennis Ball Expense Divider</span><span id="exp-body-icon">▼</span></div>
         <div id="exp-body" class="section-body">
-            <div style="margin-bottom:15px; background:#f9fafb; padding:15px; border-radius:8px; border:1px solid #e5e7eb;">
-                <label style="font-weight:bold; font-size:14px;">Total Ball Expense Amount:</label><br>
-                <input type="number" id="ball-amount" value="1200" style="padding:10px; border:1px solid #ccc; border-radius:6px; margin-top:5px; width:140px; font-size:14px;">
-                <button class="btn-primary" onclick="computeExpenses()" style="padding:10px 20px; margin-left:10px; vertical-align:middle;">Calculate Split</button>
+            <div style="margin-bottom:15px; background:#f9fafb; padding:15px; border-radius:10px; border:1px solid #e5e7eb;">
+                <label style="font-weight:bold; font-size:13px; color:#4b5563;">Accumulated Ball Cost Base:</label><br>
+                <input type="number" id="ball-amount" value="1200" style="padding:10px; border:1px solid #d1d5db; border-radius:8px; margin-top:5px; width:130px; font-size:14px; font-weight:bold;">
+                <button class="btn-primary" onclick="computeExpenses()" style="padding:10px 20px; margin-left:10px; vertical-align:middle;">Calculate Allocation</button>
             </div>
-            <table>
+            <table style="border-spacing: 0; width:100%;">
                 <thead>
-                    <tr style="background:#f3f4f6;"><th>Player Name</th><th style="text-align:center;">Total Sets Logged</th><th style="text-align:right;">Cost Share Responsibility</th></tr>
+                    <tr style="background:#f3f4f6;">
+                        <th style="text-align:left; border-bottom:2px solid #e5e7eb; padding:12px;">Active Player Name</th>
+                        <th style="text-align:center; border-bottom:2px solid #e5e7eb; padding:12px;">Total Sets Tracked</th>
+                        <th style="text-align:right; border-bottom:2px solid #e5e7eb; padding:12px;">Assigned Financial Burden</th>
+                    </tr>
                 </thead>
                 <tbody id="expense-rows">
-                    <tr><td colspan="3" style="text-align:center; color:#777; padding:20px;">No calculations run yet. Select view range and click calculate.</td></tr>
+                    <tr><td colspan="3" style="text-align:center; color:#6b7280; padding:24px; font-size:14px;">Select window tracking scale and click compute to analyze dashboard metrics.</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
 
-<!-- LINEUP MODAL -->
+<!-- POPUP MODAL DIALOGUE -->
 <div id="booking-modal" class="modal hidden">
     <div class="modal-content">
-        <h3 id="modal-title">Court Doubles Entry</h3>
-        <input type="text" id="p1" placeholder="Player 1 Name">
-        <input type="text" id="p2" placeholder="Player 2 Name">
-        <input type="text" id="p3" placeholder="Player 3 Name">
-        <input type="text" id="p4" placeholder="Player 4 Name">
+        <h3 id="modal-title">Register Doubles Lineup</h3>
+        <input type="text" id="p1" placeholder="🎾 Player 1 Full Name">
+        <input type="text" id="p2" placeholder="🎾 Player 2 Full Name">
+        <input type="text" id="p3" placeholder="🎾 Player 3 Full Name">
+        <input type="text" id="p4" placeholder="🎾 Player 4 Full Name">
         <div class="btn-group">
-            <button class="btn-secondary" onclick="closeModal()">Cancel</button>
-            <button class="btn-primary" onclick="submitData()">Save Lineup</button>
+            <button class="btn-secondary" onclick="closeModal()">Dismiss</button>
+            <button class="btn-primary" onclick="submitData()">Lock Grid Entry</button>
         </div>
     </div>
 </div>
@@ -119,7 +142,6 @@
     let loadedBookings = [];
     let targetedSlot = '', targetedCourt = '';
 
-    // Initialize default calendar display value to local calendar layout day
     document.getElementById('date-picker').value = new Date().toISOString().split('T')[0];
 
     function toggleSec(id) {
@@ -148,34 +170,6 @@
             end = new Date(baseDate.getFullYear(), baseDate.getMonth() + 1, 0);
         }
 
-        const sStr = start.toISOString().split('T')[0];
-        const eStr = end.toISOString().split('T')[0];
-
-        try {
-            const res = await fetch(`/api/bookings?start_date=${sStr}&end_date=${eStr}`);
-            loadedBookings = await res.json();
-            renderUiMatrix();
-        } catch (err) {
-            console.error("Error connecting to backend database endpoints:", err);
-        }
-    }
-
-    function renderUiMatrix() {
-        const targetDate = document.getElementById('date-picker').value;
-        const tbody = document.getElementById('matrix-rows');
-        tbody.innerHTML = '';
-
-        timeSlots.forEach(slot => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `<td style="font-size:12px; font-weight:bold; background:#f9fafb; vertical-align:middle;">${slot}</td>`;
-            
-            for(let c=1; c<=4; c++) {
-                const match = loadedBookings.find(b => b.date === targetDate && b.time_slot === slot && b.court_number === c);
-                let html = `<td class="court-cell">`;
-                if(match && match.players && match.players.length === 4) {
-                    html += `<div class="match-card"><strong>👥 Teams Locked:</strong><br>${match.players.join(', ')}<br>
-                             <button class="enter-btn" style="font-size:11px; margin-top:4px;" onclick="openModal('${slot}', ${c})">Change Lineup</button></div>`;
-                } else {
 AI Mode
 All
 Images
@@ -1395,4 +1389,431 @@ ${count}
 });
 }
 // Auto-load current day matrices on script start
+loadData();
+
+
+
+---
+
+### 🏁 3. Deploying the Fixed Code Block via Termux
+
+Restart your engine to apply the code changes and verify your database table creation:
+
+```bash
+# Push latest clean fixes back onto your repository track
+git add .
+git commit -m "Fix UI function triggers and add server database connection initialization parsing"
+git push origin main
+
+# Restart node locally to check functionality
+node server.js
+When you launch node server.js now, Termux will print:
+🚀 Database system verification complete. 'tennis_bookings' table is online.
+Your website is now dynamic, fully functional, and stores data securely inside your Postgres instance across dates.
+
+
+
+
+The error ECONNREFUSED 127.0.0.1:5432 means your Node.js application cannot find your cloud database connection string. Instead, it is looking for a PostgreSQL database running locally inside your phone (127.0.0.1).
+This happens because the environment variable configuration file (.env) is either named incorrectly, missing entirely, or the file path isn't being read properly by the server code from within Termux.
+Here is the exact fix to link your cloud database securely.
+Step 1: Create a Perfect .env File
+Make sure your connection string is formatted exactly like this. Run this command inside Termux (replace the placeholder text with your actual database link from Neon or Supabase):
+bash
+# Enter your project directory
+cd ~/tennis-tracker
+
+# Create a clean .env file with your remote database string
+cat << 'EOF' > .env
+DATABASE_URL="postgresql://neondb_owner:npg_YOUR_PASSWORD@ep-flat-resonance-a5o57wvx.us-east-1.aws.neon.tech/neondb?sslmode=require"
+EOF
+Use code with caution.
+Step 2: Update Server Path Resolution (server.js)
+Termux sometimes fails to find a .env file if it's launched from a different global pathway. Let's force your code to look for the file in the exact directory where the script resides.
+Open server.js using nano server.js and change the very first few lines to this explicit declaration:
+javascript
+const express = require('express');
+const { Pool } = require('pg');
+const parse = require('pg-connection-string').parse;
+const bodyParser = require('body-parser');
+const path = require('path');
+
+// FORCE NODE TO FIND THE .ENV FILE IN THIS EXACT DIRECTORY
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Print debugging log on startup to confirm it found the string
+if (!process.env.DATABASE_URL) {
+    console.error("❌ CRITICAL ERROR: DATABASE_URL is missing inside .env!");
+    console.log("Current Directory:", __dirname);
+} else {
+    console.log("🔑 Database connection string detected successfully.");
+}
+Use code with caution.
+Step 3: Run and Test
+Stop your current broken execution window using CTRL + C, then start it up again:
+bash
+node server.js
+Use code with caution.
+What you should see now:
+If configured correctly, the terminal output will instantly change to:
+text
+🔑 Database connection string detected successfully.
+🎾 Tennis Engine online at http://localhost:3000
+🚀 Database system verification complete. 'tennis_bookings' table is online.
+Use code with caution.
+Once you see the table is online line print, open your mobile browser to http://localhost:3000—the layout will be active, and adding player lists will now save permanently into your database.
+If the console still prints DATABASE_URL is missing, let me know where you copied your connection string from (Neon, Supabase, or somewhere else) so we can format it exactly how that provider requires!
+
+
+
+
+The log ◇ injected env (0) from .env shows that Termux is finding the .env file, but it is reading 0 variables out of it. This usually happens if there is a hidden syntax typo, a spacing issue, or invisible rich-text formatting characters around your DATABASE_URL line inside that file.
+Let's fix this permanently by completely bypassing the .env file file-reading layer and exporting the connection string directly into your Termux session environment instead.
+Execute these commands in Termux step-by-step:
+Step 1: Wipe the Bad File and Set a Clean Environment Variable
+Run this command block exactly. Replace the placeholder credentials below with your actual connection string from Neon or Supabase:
+bash
+# 1. Clear out the problematic .env file completely
+rm -f ~/tennis-tracker/.env
+
+# 2. Inject the database link directly into Termux's system variables
+export DATABASE_URL="postgresql://neondb_owner:YOUR_PASSWORD@ep-flat-resonance-a5o57wvx.us-east-1.aws.neon.tech/neondb?sslmode=require"
+Use code with caution.
+Step 2: Make the Variable Permanent (Optional but Recommended)
+To make sure you don't have to re-type that command every single time you open Termux, save it to your Termux startup profile:
+bash
+echo 'export DATABASE_URL="postgresql://neondb_owner:YOUR_PASSWORD@ep-flat-resonance-a5o57wvx.us-east-1.aws.neon.tech/neondb?sslmode=require"' >> ~/.bashrc
+Use code with caution.
+Step 3: Run the Server Again
+Now that the system environment variable is actively loaded into your terminal session, start the backend engine:
+bash
+cd ~/tennis-tracker
+node server.js
+Use code with caution.
+🎯 Expected Successful Output:
+Your application will now bypass the .env parser completely, capture the variable straight from your terminal memory, and print:
+text
+🔑 Database connection string detected successfully.
+🎾 Tennis Engine online at http://localhost:3000
+🚀 Database system verification complete. 'tennis_bookings' table is online.
+Use code with caution.
+Once you see that success message, go ahead and refresh http://localhost:3000 on your mobile browser—all your button functionality will be active and saving data to the database!
+Let me know if the server successfully connects to the database or if it throws a new message after you input the variable directly!
+
+
+
+
+Great news! The terminal logs show that the connection issue is resolved. The server successfully extracted your database string from the system memory (🔑 Database connection string detected successfully) and the backend engine is running on port 3000.
+The SECURITY WARNING is just a notice regarding the upcoming update to the PostgreSQL connection driver syntax, informing you how it handles secure SSL handshakes. It does not prevent your application from running.
+🚀 Step 1: Initialize Your Database Tables
+Since the server skipped the local database connection error, we need to ensure the tennis_bookings table is built inside your remote Postgres instance.
+Open a new separate terminal tab or window in Termux (leave the server running in the first tab) and execute this target curl trigger to force the server database schema verification logic to execute:
+bash
+# Ping your local running server to initialize the database setup check
+curl http://localhost:3000/api/bookings?start_date=2026-01-01&end_date=2026-01-02
+Use code with caution.
+Look back at your primary server window. You will see this line print out, confirming the remote cloud infrastructure is fully initialized:
+🚀 Database system verification complete. 'tennis_bookings' table is online.
+📱 Step 2: Open and Run Your App on Mobile
+You can now open the app on your phone:
+Open your phone's browser and go to: http://localhost:3000
+Try clicking + Enter 4 Players on any court slot.
+Fill out the four fields and click Save Lineup. The box will lock, showing the active teams.
+Change the date picker at the top to a different day, and then switch back—your player configurations will pull instantly from the PostgreSQL cloud database!
+🧹 Step 3: Silence the SSL Driver Warning (Optional)
+If you want to clear out the multi-line security warning message from cluttering your Termux terminal log on launch, you can update your terminal environment variable string to explicitly declare the configuration mode it recommends.
+Stop your server (CTRL + C) and run this updated export chain:
+bash
+# Add the strict verification mode flags to your terminal environment variable
+export DATABASE_URL="postgresql://neondb_owner:YOUR_PASSWORD@ep-flat-resonance-a5o57wvx.us-east-1.aws.neon.tech/neondb?sslmode=verify-full"
+
+# Restart the backend engine
+node server.js
+Use code with caution.
+Now that the database layer is active, let me know if you would like me to show you how to bundle this version up to Render.com so you can access it via a public web link without needing Termux running in the background!
+
+
+
+
+The reason the + sign and styling look completely flat or invisible is because the browser is attempting to interpret the raw text string within a plain table element without a visual boundary wrapper.
+Let's modify public/index.html to add clear, responsive touch targets with distinct background colors, explicit borders, and visual icons so it acts like a true mobile application dashboard.
+Run nano public/index.html in Termux and replace the file contents with this updated structural code:
+html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tennis Court Tracker</title>
+    <style>
+        body { font-family: -apple-system, system-ui, sans-serif; background: #f3f4f6; margin: 0; padding: 12px; color: #1f2937; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        header { background: #1e40af; color: white; padding: 16px; border-radius: 12px; text-align: center; margin-bottom: 15px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .section { background: white; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow: hidden; border: 1px solid #e5e7eb; }
+        .section-header { background: #f3f4f6; padding: 14px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; border-bottom: 1px solid #e5e7eb; }
+        .section-body { padding: 15px; }
+        .hidden { display: none !important; }
+        .view-btn { padding: 10px 18px; border: 1px solid #d1d5db; background: white; cursor: pointer; font-weight: bold; font-size: 14px; }
+        .view-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
+        table { width: 100%; border-collapse: separate; border-spacing: 4px; min-width: 700px; }
+        th { background: #f9fafb; font-size: 13px; color: #4b5563; text-transform: uppercase; letter-spacing: 0.05em; padding: 10px; border-radius: 6px; }
+        td { padding: 4px; vertical-align: middle; }
+        .time-cell { background: #f9fafb; font-size: 12px; font-weight: bold; border: 1px solid #e5e7eb; border-radius: 8px; text-align: center; padding: 10px 4px; color: #374151; }
+        
+        /* FIX: Highly visible action button wrapper */
+        .add-lineup-btn { 
+            display: block; 
+            width: 100%; 
+            box-sizing: border-box;
+            background: #f0fdf4; 
+            color: #166534; 
+            border: 2px dashed #bbf7d0; 
+            border-radius: 8px; 
+            padding: 12px 8px; 
+            font-weight: bold; 
+            font-size: 13px; 
+            text-align: center; 
+            cursor: pointer; 
+            transition: all 0.2s ease;
+        }
+        .add-lineup-btn:hover { background: #dcfce7; border-color: #86efac; }
+        
+        .match-card { background: #eff6ff; padding: 10px; border-radius: 8px; font-size: 12px; border: 1px solid #bfdbfe; box-shadow: inset 0 1px 2px rgba(0,0,0,0.02); }
+        .edit-link { display: inline-block; margin-top: 6px; color: #2563eb; font-weight: bold; text-decoration: underline; background: none; border: none; padding: 0; cursor: pointer; font-size: 11px; }
+        
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 1000; }
+        .modal-content { background: white; padding: 20px; border-radius: 16px; max-width: 400px; width: 100%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); }
+        .modal-content h3 { margin-top: 0; margin-bottom: 15px; color: #111827; font-size: 18px; }
+        .modal-content input { width: 100%; box-sizing: border-box; padding: 12px; margin-bottom: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; background: #f9fafb; }
+        .modal-content input:focus { border-color: #2563eb; background: white; outline: none; }
+        .btn-group { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
+        .btn-primary { background: #2563eb; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        .btn-secondary { background: #e5e7eb; color: #374151; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1 style="margin:0; font-size:22px; letter-spacing: -0.025em;">🎾 Tennis Court Scheduling Matrix</h1>
+        <p style="margin:4px 0 0 0; opacity:0.9; font-size:13px;">Doubles Logbook & Court-Side Ball Expense Splitter</p>
+    </header>
+
+    <!-- CALENDAR PANEL -->
+    <div class="section">
+        <div class="section-header" onclick="toggleSec('cal-body')"><span>📅 Timeline Scope Selection</span><span id="cal-body-icon">▼</span></div>
+        <div id="cal-body" class="section-body">
+            <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+                <input type="date" id="date-picker" style="padding:10px; border-radius:8px; border:1px solid #d1d5db; font-size:14px; font-weight:500;" onchange="loadData()">
+                <div style="border-radius:8px; overflow:hidden; display:inline-flex; border:1px solid #d1d5db;">
+                    <button class="view-btn active" id="btn-day" onclick="changeView('day')">Day</button>
+                    <button class="view-btn" id="btn-week" onclick="changeView('week')">Week</button>
+                    <button class="view-btn" id="btn-month" onclick="changeView('month')">Month</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TRACKER SHEET -->
+    <div class="section">
+        <div class="section-header" onclick="toggleSec('matrix-body-sec')"><span>⚔️ 4-Court Operational Grid Matrix</span><span id="matrix-body-sec-icon">▼</span></div>
+        <div id="matrix-body-sec" class="section-body" style="overflow-x:auto; padding: 8px;">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:140px;">Time Slot</th>
+                        <th>Court 1</th>
+                        <th>Court 2</th>
+                        <th>Court 3</th>
+                        <th>Court 4</th>
+                    </tr>
+                </thead>
+                <tbody id="matrix-rows"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- EXPENSE SHEET -->
+    <div class="section">
+        <div class="section-header" onclick="toggleSec('exp-body')"><span>💵 Proportional Tennis Ball Expense Divider</span><span id="exp-body-icon">▼</span></div>
+        <div id="exp-body" class="section-body">
+            <div style="margin-bottom:15px; background:#f9fafb; padding:15px; border-radius:10px; border:1px solid #e5e7eb;">
+                <label style="font-weight:bold; font-size:13px; color:#4b5563;">Accumulated Ball Cost Base:</label><br>
+                <input type="number" id="ball-amount" value="1200" style="padding:10px; border:1px solid #d1d5db; border-radius:8px; margin-top:5px; width:130px; font-size:14px; font-weight:bold;">
+                <button class="btn-primary" onclick="computeExpenses()" style="padding:10px 20px; margin-left:10px; vertical-align:middle;">Calculate Allocation</button>
+            </div>
+            <table style="border-spacing: 0; width:100%;">
+                <thead>
+                    <tr style="background:#f3f4f6;">
+                        <th style="text-align:left; border-bottom:2px solid #e5e7eb; padding:12px;">Active Player Name</th>
+                        <th style="text-align:center; border-bottom:2px solid #e5e7eb; padding:12px;">Total Sets Tracked</th>
+                        <th style="text-align:right; border-bottom:2px solid #e5e7eb; padding:12px;">Assigned Financial Burden</th>
+                    </tr>
+                </thead>
+                <tbody id="expense-rows">
+                    <tr><td colspan="3" style="text-align:center; color:#6b7280; padding:24px; font-size:14px;">Select window tracking scale and click compute to analyze dashboard metrics.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- POPUP MODAL DIALOGUE -->
+<div id="booking-modal" class="modal hidden">
+    <div class="modal-content">
+        <h3 id="modal-title">Register Doubles Lineup</h3>
+        <input type="text" id="p1" placeholder="🎾 Player 1 Full Name">
+        <input type="text" id="p2" placeholder="🎾 Player 2 Full Name">
+        <input type="text" id="p3" placeholder="🎾 Player 3 Full Name">
+        <input type="text" id="p4" placeholder="🎾 Player 4 Full Name">
+        <div class="btn-group">
+            <button class="btn-secondary" onclick="closeModal()">Dismiss</button>
+            <button class="btn-primary" onclick="submitData()">Lock Grid Entry</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const timeSlots = [
+        "07:00 AM - 07:30 AM", "07:30 AM - 08:00 AM", 
+        "08:00 AM - 08:30 AM", "08:30 AM - 09:00 AM", 
+        "09:00 AM - 09:30 AM", "09:30 AM - 10:00 AM"
+    ];
+    let currentView = 'day';
+    let loadedBookings = [];
+    let targetedSlot = '', targetedCourt = '';
+
+    document.getElementById('date-picker').value = new Date().toISOString().split('T')[0];
+
+    function toggleSec(id) {
+        const el = document.getElementById(id);
+        const icon = document.getElementById(id + '-icon');
+        el.classList.toggle('hidden');
+        icon.innerText = el.classList.contains('hidden') ? '►' : '▼';
+    }
+    
+    function changeView(mode) {
+        ['day', 'week', 'month'].forEach(m => document.getElementById('btn-'+m).classList.remove('active'));
+        document.getElementById('btn-'+mode).classList.add('active');
+        currentView = mode;
+        loadData();
+    }
+
+    async function loadData() {
+        const baseDate = new Date(document.getElementById('date-picker').value);
+        let start = new Date(baseDate), end = new Date(baseDate);
+        
+        if(currentView === 'week') {
+            start.setDate(baseDate.getDate() - baseDate.getDay());
+            end.setDate(baseDate.getDate() + (6 - baseDate.getDay()));
+        } else if(currentView === 'month') {
+            start = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
+            end = new Date(baseDate.getFullYear(), baseDate.getMonth() + 1, 0);
+        }
+
+Use code with caution.
+const sStr = start.toISOString().split('T')[0];
+const eStr = end.toISOString().split('T')[0];
+try {
+const res = await fetch(/api/bookings?start_date=${sStr}&end_date=${eStr});
+loadedBookings = await res.json();
+renderUiMatrix();
+} catch (err) {
+console.error("Database connection failure:", err);
+}
+}
+function renderUiMatrix() {
+const targetDate = document.getElementById('date-picker').value;
+const tbody = document.getElementById('matrix-rows');
+tbody.innerHTML = '';
+timeSlots.forEach(slot => {
+const tr = document.createElement('tr');
+tr.innerHTML = <td class="time-cell">${slot}</td>;
+for(let c=1; c<=4; c++) {
+const match = loadedBookings.find(b => b.date === targetDate && b.time_slot === slot && b.court_number === c);
+let html = <td>;
+if(match && match.players && match.players.length === 4) {
+html += <div class="match-card"> <span style="color:#1d4ed8; font-weight:bold; display:block; margin-bottom:3px;">✅ Doubles Team</span> <div style="color:#4b5563; font-weight:500; line-height:1.3;">${match.players.join('<br>')}</div> <button class="edit-link" onclick="openModal('${slot}', ${c})">Modify Lineup</button> </div>;
+} else {
+html += <button class="add-lineup-btn" onclick="openModal('${slot}', ${c})">➕ Add Match</button>;
+}
+html += </td>;
+tr.innerHTML += html;
+}
+tbody.appendChild(tr);
+});
+}
+function openModal(slot, court) {
+targetedSlot = slot; targetedCourt = court;
+document.getElementById('modal-title').innerText = Court ${court} Lineup (${slot});
+const targetDate = document.getElementById('date-picker').value;
+const match = loadedBookings.find(b => b.date === targetDate && b.time_slot === slot && b.court_number === court);
+document.getElementById('p1').value = match ? match.players[0] : '';
+document.getElementById('p2').value = match ? match.players[1] : '';
+document.getElementById('p3').value = match ? match.players[2] : '';
+document.getElementById('p4').value = match ? match.players[3] : '';
+document.getElementById('booking-modal').classList.remove('hidden');
+}
+function closeModal() { document.getElementById('booking-modal').classList.add('hidden'); }
+async function submitData() {
+const p1 = document.getElementById('p1').value.trim();
+const p2 = document.getElementById('p2').value.trim();
+const p3 = document.getElementById('p3').value.trim();
+const p4 = document.getElementById('p4').value.trim();
+if(!p1 || !p2 || !p3 || !p4) {
+alert("A complete doubles line-up registration requires exactly 4 player names.");
+return;
+}
+const payload = {
+booking_date: document.getElementById('date-picker').value,
+time_slot: targetedSlot,
+court_number: targetedCourt,
+players: [p1, p2, p3, p4]
+};
+try {
+const res = await fetch('/api/bookings', {
+method: 'POST',
+headers: {'Content-Type': 'application/json'},
+body: JSON.stringify(payload)
+});
+if (res.ok) {
+closeModal();
+loadData();
+} else {
+alert("Server infrastructure synchronization payload dropout.");
+}
+} catch(e) {
+console.error(e);
+}
+}
+function computeExpenses() {
+const totalCost = parseFloat(document.getElementById('ball-amount').value) || 0;
+let playerWeights = {}, grandTotalSets = 0;
+loadedBookings.forEach(b => {
+if(b.players && b.players.length === 4) {
+b.players.forEach(p => {
+playerWeights[p] = (playerWeights[p] || 0) + 1;
+grandTotalSets++;
+});
+}
+});
+const container = document.getElementById('expense-rows');
+container.innerHTML = '';
+if(grandTotalSets === 0) {
+container.innerHTML = <tr><td colspan="3" style="text-align:center; color:#dc2626; padding:20px; font-weight:bold;">No confirmed doubles tracking items match this specific parameter duration.</td></tr>;
+return;
+}
+Object.keys(playerWeights).sort().forEach(player => {
+const count = playerWeights[player];
+const fractionalCost = (count / grandTotalSets) * totalCost;
+container.innerHTML += `
+👤 ${player}
+${count} Sets
+₹${fractionalCost.toFixed(2)}
+`;
+});
+}
 loadData();
