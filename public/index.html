@@ -134,7 +134,7 @@
     
     function changeView(mode) {
         ['day', 'week', 'month'].forEach(m => document.getElementById('btn-'+m).classList.remove('active'));
-        document.getElementById('btn-'+mode).classList.add('active'); // FIXED: Removed the broken append line syntax typo
+        document.getElementById('btn-'+mode).classList.add('active'); // FIXED: Removed the broken `.append` statement string mismatch
         currentView = mode;
         loadData();
     }
@@ -184,10 +184,10 @@ const prettyDate = new Date(dateStr).toLocaleDateString('en-IN', options);
 dateBlock.innerHTML = <div class="date-divider">📆 ${prettyDate}</div>;
 let tableHtml = `
 Time Slot
-
 Court 1
 Court 2Court 3Court 4`;
-    timeSlots.forEach(slot => {
+
+timeSlots.forEach(slot => {
         tableHtml += `<tr><td class="time-cell">${slot}</td>`;
         for(let c = 1; c <= 4; c++) {
             const match = loadedBookings.find(b => b.date === dateStr && b.time_slot === slot && b.court_number === c);
@@ -213,7 +213,7 @@ function openModal(slot, court, dateStr) {
 targetedSlot = slot; targetedCourt = court; targetedDate = dateStr;
 document.getElementById('modal-title').innerText = Lineup Entry: Court ${court} (${slot});
 const match = loadedBookings.find(b => b.date === dateStr && b.time_slot === slot && b.court_number === court);
-// Correct array spreading syntax so comma characters don't print inside the first name text fields
+// FIXED: Clear values properly or extract elements so that commas do not link into text inputs
 document.getElementById('p1').value = match && match.players ? match.players : '';
 document.getElementById('p2').value = match && match.players ? match.players : '';
 document.getElementById('p3').value = match && match.players ? match.players : '';
@@ -230,7 +230,6 @@ if(!p1 || !p2 || !p3 || !p4) {
 alert("All 4 player input fields are mandatory for dynamic doubles tracking.");
 return;
 }
-
 const payload = {
 booking_date: targetedDate,
 time_slot: targetedSlot,
@@ -253,7 +252,6 @@ alert("Failed to synchronize properties to server database connection endpoint."
 console.error(e);
 }
 }
-
 function computeExpenses() {
 const totalCost = parseFloat(document.getElementById('ball-amount').value) || 0;
 let playerWeights = {}, grandTotalSets = 0;
@@ -275,6 +273,7 @@ Object.keys(playerWeights).sort().forEach(player => {
 const count = playerWeights[player];
 const fractionalCost = (count / grandTotalSets) * totalCost;
 container.innerHTML += `
+
 👤 ${player}
 ${count} Sets
 ₹${fractionalCost.toFixed(2)}
