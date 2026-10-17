@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,31 +9,21 @@
         .container { max-width: 1000px; margin: 0 auto; }
         header { background: #1e40af; color: white; padding: 16px; border-radius: 12px; text-align: center; margin-bottom: 15px; }
         .section { background: white; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow: hidden; border: 1px solid #e5e7eb; }
-        .section-header { background: #f3f4f6; padding: 14px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; }
+        .section-header { background: #f3f4f6; padding: 14px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; user-select: none; }
         .section-body { padding: 15px; }
         .hidden { display: none !important; }
         .view-btn { padding: 10px 18px; border: 1px solid #d1d5db; background: white; cursor: pointer; font-weight: bold; font-size: 14px; }
         .view-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
-        table { width: 100%; border-collapse: separate; border-spacing: 6px; min-width: 750px; }
+        
+        .date-divider { background: #3b82f6; color: white; padding: 8px 12px; font-weight: bold; margin-top: 15px; border-radius: 6px; font-size: 14px; }
+        table { width: 100%; border-collapse: separate; border-spacing: 6px; min-width: 750px; margin-bottom: 15px; }
         th { background: #f9fafb; font-size: 13px; color: #4b5563; text-transform: uppercase; padding: 10px; border-radius: 6px; text-align: center; }
         td { padding: 2px; vertical-align: middle; }
         .time-cell { background: #f9fafb; font-size: 12px; font-weight: bold; border: 1px solid #e5e7eb; border-radius: 8px; text-align: center; padding: 12px 6px; color: #374151; }
         
-        /* High-visibility Action Target Grid Boxes */
         .add-lineup-btn { 
-            display: block; 
-            width: 100%; 
-            min-height: 50px;
-            box-sizing: border-box;
-            background: #e6f4ea; 
-            color: #137333; 
-            border: 2px dashed #a3cfbb; 
-            border-radius: 8px; 
-            padding: 12px 4px; 
-            font-weight: bold; 
-            font-size: 14px; 
-            text-align: center; 
-            cursor: pointer;
+            display: block; width: 100%; min-height: 50px; box-sizing: border-box; background: #e6f4ea; color: #137333; 
+            border: 2px dashed #a3cfbb; border-radius: 8px; padding: 12px 4px; font-weight: bold; font-size: 14px; text-align: center; cursor: pointer;
         }
         .add-lineup-btn:hover { background: #d1e7dd; border-color: #74b899; }
         
@@ -57,7 +46,7 @@
         <p style="margin:4px 0 0 0; opacity:0.9; font-size:13px;">Doubles Logbook & Court-Side Ball Expense Splitter</p>
     </header>
 
-    <!-- SECTION 1: TIMELINE -->
+    <!-- TIMELINE RANGE SELECTOR -->
     <div class="section">
         <div class="section-header" onclick="toggleSec('cal-body')"><span>📅 Timeline Scope Selection</span><span id="cal-body-icon">▼</span></div>
         <div id="cal-body" class="section-body">
@@ -72,26 +61,15 @@
         </div>
     </div>
 
-    <!-- SECTION 2: THE GRID MATRIX -->
+    <!-- MAIN SCHEDULING CONTAINER -->
     <div class="section">
-        <div class="section-header" onclick="toggleSec('matrix-body-sec')"><span>⚔️ 4-Court Operational Grid Matrix</span><span id="matrix-body-sec-icon">▼</span></div>
+        <div class="section-header" onclick="toggleSec('matrix-body-sec')"><span>⚔️ Court Grid Timeline View Matrix</span><span id="matrix-body-sec-icon">▼</span></div>
         <div id="matrix-body-sec" class="section-body" style="overflow-x:auto; padding: 8px;">
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width:150px;">Time Slot</th>
-                        <th>Court 1</th>
-                        <th>Court 2</th>
-                        <th>Court 3</th>
-                        <th>Court 4</th>
-                    </tr>
-                </thead>
-                <tbody id="matrix-rows"></tbody>
-            </table>
+            <div id="dynamic-grid-container"></div>
         </div>
     </div>
 
-    <!-- SECTION 3: EXPENSES -->
+    <!-- EXPENSE SHEET -->
     <div class="section">
         <div class="section-header" onclick="toggleSec('exp-body')"><span>💵 Proportional Tennis Ball Expense Divider</span><span id="exp-body-icon">▼</span></div>
         <div id="exp-body" class="section-body">
@@ -100,7 +78,7 @@
                 <input type="number" id="ball-amount" value="1200" style="padding:10px; border:1px solid #d1d5db; border-radius:8px; margin-top:5px; width:130px; font-size:14px; font-weight:bold;">
                 <button class="btn-primary" onclick="computeExpenses()" style="padding:10px 20px; margin-left:10px; vertical-align:middle;">Calculate Allocation</button>
             </div>
-            <table style="border-spacing: 0; width:100%;">
+            <table style="border-spacing: 0; width:100%; min-width:100%;">
                 <thead>
                     <tr style="background:#f3f4f6;">
                         <th style="text-align:left; padding:12px;">Active Player Name</th>
@@ -116,7 +94,7 @@
     </div>
 </div>
 
-<!-- ENTRY MODAL CONTAINER -->
+<!-- ENTRY MODAL -->
 <div id="booking-modal" class="modal hidden">
     <div class="modal-content">
         <h3 id="modal-title" style="margin-top:0;">Register Doubles Lineup</h3>
@@ -139,9 +117,8 @@
     ];
     let currentView = 'day';
     let loadedBookings = [];
-    let targetedSlot = '', targetedCourt = '';
+    let targetedSlot = '', targetedCourt = '', targetedDate = '';
 
-    // FIX: Set explicit date string on startup immediately so interface doesn't default to empty (dd/mm/yyyy)
     const today = new Date();
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, '0');
@@ -157,14 +134,14 @@
     
     function changeView(mode) {
         ['day', 'week', 'month'].forEach(m => document.getElementById('btn-'+m).classList.remove('active'));
-        document.getElementById('btn-'+mode).classList.add('active');
+        document.getElementById('btn-'+mode).classList.add('active'); // FIXED: Removed the broken append line syntax typo
         currentView = mode;
         loadData();
     }
 
     async function loadData() {
         const pickerVal = document.getElementById('date-picker').value;
-        if(!pickerVal) return; // Prevent breakdown on incomplete entries
+        if(!pickerVal) return;
         
         const baseDate = new Date(pickerVal);
         let start = new Date(baseDate), end = new Date(baseDate);
@@ -176,70 +153,110 @@
             start = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
             end = new Date(baseDate.getFullYear(), baseDate.getMonth() + 1, 0);
         }
-        const sStr = start.toISOString().split('T')[0];
-        const eStr = end.toISOString().split('T')[0];
 
+        const sStr = start.toISOString().split('T');
+        const eStr = end.toISOString().split('T');
+
+        try {
+            const res = await fetch(`/api/bookings?start_date=${sStr}&end_date=${eStr}`);
+            loadedBookings = await res.json();
+            renderUiMatrix(sStr, eStr);
+        } catch (err) {
+            console.error("Database sync drop:", err);
+        }
+    }
+
+    function renderUiMatrix(startDateStr, endDateStr) {
+        const container = document.getElementById('dynamic-grid-container');
+
+container.innerHTML = '';
+let dateList = [];
+let cursor = new Date(startDateStr);
+let endBound = new Date(endDateStr);
+while(cursor <= endBound) {
+dateList.push(cursor.toISOString().split('T'));
+cursor.setDate(cursor.getDate() + 1);
+}
+dateList.forEach(dateStr => {
+const dateBlock = document.createElement('div');
+const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+const prettyDate = new Date(dateStr).toLocaleDateString('en-IN', options);
+dateBlock.innerHTML = <div class="date-divider">📆 ${prettyDate}</div>;
+let tableHtml = `
+Time Slot
+
+Court 1
+Court 2Court 3Court 4`;
+    timeSlots.forEach(slot => {
+        tableHtml += `<tr><td class="time-cell">${slot}</td>`;
+        for(let c = 1; c <= 4; c++) {
+            const match = loadedBookings.find(b => b.date === dateStr && b.time_slot === slot && b.court_number === c);
+            tableHtml += `<td>`;
+            if(match && match.players && match.players.length === 4) {
+                tableHtml += `<div class="match-card">
+`;
+} else {
+tableHtml += <button class="add-lineup-btn" onclick="openModal('${slot}', ${c}, '${dateStr}')">➕ Add Match</button>;
+}
+tableHtml += </td>;
+}
+tableHtml += </tr>;
+});
+tableHtml += </tbody></table>;
+dateBlock.innerHTML += tableHtml;
+container.appendChild(dateBlock);
+});
+
+computeExpenses();
+}
+function openModal(slot, court, dateStr) {
+targetedSlot = slot; targetedCourt = court; targetedDate = dateStr;
+document.getElementById('modal-title').innerText = Lineup Entry: Court ${court} (${slot});
+const match = loadedBookings.find(b => b.date === dateStr && b.time_slot === slot && b.court_number === court);
+// Correct array spreading syntax so comma characters don't print inside the first name text fields
+document.getElementById('p1').value = match && match.players ? match.players : '';
+document.getElementById('p2').value = match && match.players ? match.players : '';
+document.getElementById('p3').value = match && match.players ? match.players : '';
+document.getElementById('p4').value = match && match.players ? match.players : '';
+document.getElementById('booking-modal').classList.remove('hidden');
+}
+function closeModal() { document.getElementById('booking-modal').classList.add('hidden'); }
+async function submitData() {
+const p1 = document.getElementById('p1').value.trim();
+const p2 = document.getElementById('p2').value.trim();
+const p3 = document.getElementById('p3').value.trim();
+const p4 = document.getElementById('p4').value.trim();
+if(!p1 || !p2 || !p3 || !p4) {
+alert("All 4 player input fields are mandatory for dynamic doubles tracking.");
+return;
+}
+
+const payload = {
+booking_date: targetedDate,
+time_slot: targetedSlot,
+court_number: targetedCourt,
+players: [p1, p2, p3, p4]
+};
 try {
-const res = await fetch(/api/bookings?start_date=${sStr}&end_date=${eStr});
-loadedBookings = await res.json();
-renderUiMatrix();
-} catch (err) {
-console.error("Database sync drop:", err);
-}
-}
-
-function renderUiMatrix() {
-const targetDate = document.getElementById('date-picker').value;
-const tbody = document.getElementById('matrix-rows');
-tbody.innerHTML = '';
-
-timeSlots.forEach(slot => {
-const tr = document.createElement('tr');
-tr.innerHTML = <td class="time-cell">${slot}</td>;
-
-for(let c=1; c<=4; c++) {
-const match = loadedBookings.find(b => b.date === targetDate && b.time_slot === slot && b.court_number === c);
-let html = <td>;
-if(match && match.players && match.players.length === 4) {
-html += <div class="match-card"> <span style="color:#1d4ed8; font-weight:bold; display:block; margin-bottom:4px;">✅ Active Match</span> <div style="color:#4b5563; font-weight:bold; line-height:1.4;">${match.players.join(', ')}</div> <button class="edit-link" onclick="openModal('${slot}', ${c})">Modify Lineup</button> </div>;
-} else {
-html += <button class="add-lineup-btn" onclick="openModal('${slot}', ${c})">➕ Add Match</button>;
-}
-html += </td>;
-tr.innerHTML += html;
-}
-tbody.appendChild(tr);
+const res = await fetch('/api/bookings', {
+method: 'POST',
+headers: {'Content-Type': 'application/json'},
+body: JSON.stringify(payload)
 });
-}
-
-function renderUiMatrix() {
-const targetDate = document.getElementById('date-picker').value;
-const tbody = document.getElementById('matrix-rows');
-tbody.innerHTML = '';
-
-timeSlots.forEach(slot => {
-const tr = document.createElement('tr');
-tr.innerHTML = <td class="time-cell">${slot}</td>;
-
-for(let c=1; c<=4; c++) {
-const match = loadedBookings.find(b => b.date === targetDate && b.time_slot === slot && b.court_number === c);
-let html = <td>;
-if(match && match.players && match.players.length === 4) {
-html += <div class="match-card"> <span style="color:#1d4ed8; font-weight:bold; display:block; margin-bottom:4px;">✅ Active Match</span> <div style="color:#4b5563; font-weight:bold; line-height:1.4;">${match.players.join(', ')}</div> <button class="edit-link" onclick="openModal('${slot}', ${c})">Modify Lineup</button> </div>;
+if (res.ok) {
+closeModal();
+loadData();
 } else {
-html += <button class="add-lineup-btn" onclick="openModal('${slot}', ${c})">➕ Add Match</button>;
+alert("Failed to synchronize properties to server database connection endpoint.");
 }
-html += </td>;
-tr.innerHTML += html;
+} catch(e) {
+console.error(e);
 }
-tbody.appendChild(tr);
-});
 }
 
 function computeExpenses() {
 const totalCost = parseFloat(document.getElementById('ball-amount').value) || 0;
 let playerWeights = {}, grandTotalSets = 0;
-
 loadedBookings.forEach(b => {
 if(b.players && b.players.length === 4) {
 b.players.forEach(p => {
@@ -248,30 +265,20 @@ grandTotalSets++;
 });
 }
 });
-
 const container = document.getElementById('expense-rows');
 container.innerHTML = '';
-
 if(grandTotalSets === 0) {
 container.innerHTML = <tr><td colspan="3" style="text-align:center; color:#dc2626; padding:20px; font-weight:bold;">No matches found matching this parameter date window.</td></tr>;
 return;
 }
-
 Object.keys(playerWeights).sort().forEach(player => {
 const count = playerWeights[player];
 const fractionalCost = (count / grandTotalSets) * totalCost;
 container.innerHTML += `
-
 👤 ${player}
-
 ${count} Sets
-
 ₹${fractionalCost.toFixed(2)}
-
 `;
 });
 }
-
-// Auto-fetch data array metrics on load
 loadData();
-
