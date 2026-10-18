@@ -111,10 +111,14 @@
     </div>
 </div>
 
+
+
+
+
 <script>
     const timeSlots = [
-        "07:00 AM - 07:30 AM", "07:30 AM - 08:00 AM", 
-        "08:00 AM - 08:30 AM", "08:30 AM - 09:00 AM", 
+        "07:00 AM - 07:30 AM", "07:30 AM - 08:00 AM",
+        "08:00 AM - 08:30 AM", "08:30 AM - 09:00 AM",
         "09:00 AM - 09:30 AM", "09:30 AM - 10:00 AM"
     ];
     let loadedBookings = [];
@@ -130,32 +134,36 @@
         const el = document.getElementById(id);
         const icon = document.getElementById(id + '-icon');
         el.classList.toggle('hidden');
-        icon.innerText = el.classList.contains('hidden') ? '►' : '▼';
+        if (icon) icon.innerText = el.classList.contains('hidden') ? '►' : '▼';
     }
 
     async function loadData() {
         const pickerVal = document.getElementById('date-picker').value;
-        if(!pickerVal) return;
-        
+        if (!pickerVal) return;
+
         const baseDate = new Date(pickerVal);
-        
-        // AUTOMATION TARGET: Derive start and end range boundaries for the full active month context dynamically
         const start = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
         const end = new Date(baseDate.getFullYear(), baseDate.getMonth() + 1, 0);
 
-        const sStr = start.toISOString().split('T');
-        const eStr = end.toISOString().split('T');
+        const sStr = start.toISOString().split('T')[0];
+        const eStr = end.toISOString().split('T')[0];
 
-        // Dynamic Header Label Mapping Update
         const monthLabel = baseDate.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
         document.getElementById('expense-header-title').innerText = `💵 Proportional Ball Expense Divider (${monthLabel})`;
 
         try {
             const res = await fetch(`/api/bookings?start_date=${sStr}&end_date=${eStr}`);
-            loadedBookings = await res.json();
+            if (res.ok) {
+                loadedBookings = await res.json();
+            } else {
+                // fallback to empty array if endpoint unavailable
+                loadedBookings = [];
+            }
             renderDailyGrid(pickerVal);
         } catch (err) {
-            console.error("Database schema payload dropout connection drop:", err);
+            console.error("Error loading bookings:", err);
+            loadedBookings = [];
+            renderDailyGrid(pickerVal);
         }
     }
 
@@ -165,94 +173,141 @@
 
         timeSlots.forEach(slot => {
             const tr = document.createElement('tr');
-            tr.innerHTML = `<td class="time-cell">${slot}</td>`;
-            
-            for(let c = 1; c <= 4; c++) {
-                const match = loadedBookings.find(b => b.date === targetDateStr && b.time_slot === slot && b.court_number === c);
-                let html = `<td>`;
-                if(match && match.players && match.players.length === 4) {
-                    html += `<div class="match-card">
-                                <span style="color:#1d4ed8; font-weight:bold; display:block; margin-bottom:4px;">✅ Active Match</span>
 
-${match.players.join(', ')}
-Modify Lineup
-; } else { html += ➕ Add Match; } html += `;
-tr.innerHTML += html;
-}
-tbody.appendChild(tr);
-});
-// Run calculation instantly using the full monthly batch array allocation
-computeExpenses();
-}
-function openModal(slot, court, dateStr) {
-targetedSlot = slot; targetedCourt = court; targetedDate = dateStr;
-document.getElementById('modal-title').innerText = Lineup Entry: Court ${court} (${slot});
-const match = loadedBookings.find(b => b.date === dateStr && b.time_slot === slot && b.court_number === court);
-document.getElementById('p1').value = match && match.players ? match.players : '';
-document.getElementById('p2').value = match && match.players ? match.players : '';
-document.getElementById('p3').value = match && match.players ? match.players : '';
-document.getElementById('p4').value = match && match.players ? match.players : '';
-document.getElementById('booking-modal').classList.remove('hidden');
-}
-function closeModal() { document.getElementById('booking-modal').classList.add('hidden'); }
-async function submitData() {
-const p1 = document.getElementById('p1').value.trim();
-const p2 = document.getElementById('p2').value.trim();
-const p3 = document.getElementById('p3').value.trim();
-const p4 = document.getElementById('p4').value.trim();
-if(!p1 || !p2 || !p3 || !p4) {
-alert("All 4 player input fields are mandatory for dynamic doubles tracking.");
-return;
-}
-const payload = {
-booking_date: targetedDate,
-time_slot: targetedSlot,
-court_number: targetedCourt,
-players: [p1, p2, p3, p4]
-};
-try {
-const res = await fetch('/api/bookings', {
-method: 'POST',
-headers: {'Content-Type': 'application/json'},
-body: JSON.stringify(payload)
-});
-if (res.ok) {
-closeModal();
-loadData();
-} else {
-alert("Failed to synchronize properties to server database connection endpoint.");
-}
-} catch(e) {
-console.error(e);
-}
-}
-function computeExpenses() {
-const totalCost = parseFloat(document.getElementById('ball-amount').value) || 0;
-let playerWeights = {}, grandTotalSets = 0;
-// Processes the global set array for whatever month is actively targeted by the input date context
-loadedBookings.forEach(b => {
-if(b.players && b.players.length === 4) {
-b.players.forEach(p => {
-playerWeights[p] = (playerWeights[p] || 0) + 1;
-grandTotalSets++;
-});
-}
-});
-const container = document.getElementById('expense-rows');
-container.innerHTML = '';
-if(grandTotalSets === 0) {
-container.innerHTML = <tr><td colspan="3" style="text-align:center; color:#dc2626; padding:20px; font-weight:bold;">No matches recorded in the database for this specific month slot context.</td></tr>;
-return;
-}
-Object.keys(playerWeights).sort().forEach(player => {
-const count = playerWeights[player];
-const fractionalCost = (count / grandTotalSets) * totalCost;
-container.innerHTML += `
-👤 ${player}
-${count} Sets
-₹${fractionalCost.toFixed(2)}
-`;
-});
-}
-// Auto-fetch dashboard array allocations on startup initialization
-loadData();
+            const tdTime = document.createElement('td');
+            tdTime.className = 'time-cell';
+            tdTime.textContent = slot;
+            tr.appendChild(tdTime);
+
+            for (let c = 1; c <= 4; c++) {
+                const td = document.createElement('td');
+                const match = loadedBookings.find(b => b.date === targetDateStr && b.time_slot === slot && b.court_number === c);
+
+                if (match && match.players && match.players.length === 4) {
+                    const div = document.createElement('div');
+                    div.className = 'match-card';
+
+                    const status = document.createElement('div');
+                    status.innerHTML = `<span style="color:#1d4ed8; font-weight:bold; display:block; margin-bottom:4px;">✅ Active Match</span>`;
+                    div.appendChild(status);
+
+                    const playersDiv = document.createElement('div');
+                    playersDiv.style.marginBottom = '8px';
+                    playersDiv.textContent = match.players.join(', ');
+                    div.appendChild(playersDiv);
+
+                    const editBtn = document.createElement('button');
+                    editBtn.className = 'edit-link';
+                    editBtn.textContent = 'Modify Lineup';
+                    editBtn.onclick = () => openModal(slot, c, targetDateStr);
+                    div.appendChild(editBtn);
+
+                    td.appendChild(div);
+                } else {
+                    const addBtn = document.createElement('button');
+                    addBtn.className = 'add-lineup-btn';
+                    addBtn.textContent = '➕ Add Match';
+                    addBtn.onclick = () => openModal(slot, c, targetDateStr);
+                    td.appendChild(addBtn);
+                }
+
+                tr.appendChild(td);
+            }
+
+            tbody.appendChild(tr);
+        });
+
+        computeExpenses();
+    }
+
+    function openModal(slot, court, dateStr) {
+        targetedSlot = slot;
+        targetedCourt = court;
+        targetedDate = dateStr;
+        document.getElementById('modal-title').innerText = `Lineup Entry: Court ${court} (${slot})`;
+
+        const match = loadedBookings.find(b => b.date === dateStr && b.time_slot === slot && b.court_number === court);
+        document.getElementById('p1').value = match && match.players ? (match.players[0] || '') : '';
+        document.getElementById('p2').value = match && match.players ? (match.players[1] || '') : '';
+        document.getElementById('p3').value = match && match.players ? (match.players[2] || '') : '';
+        document.getElementById('p4').value = match && match.players ? (match.players[3] || '') : '';
+
+        document.getElementById('booking-modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+        document.getElementById('booking-modal').classList.add('hidden');
+    }
+
+    async function submitData() {
+        const p1 = document.getElementById('p1').value.trim();
+        const p2 = document.getElementById('p2').value.trim();
+        const p3 = document.getElementById('p3').value.trim();
+        const p4 = document.getElementById('p4').value.trim();
+        if (!p1 || !p2 || !p3 || !p4) {
+            alert("All 4 player input fields are mandatory for dynamic doubles tracking.");
+            return;
+        }
+        const payload = {
+            booking_date: targetedDate,
+            time_slot: targetedSlot,
+            court_number: targetedCourt,
+            players: [p1, p2, p3, p4]
+        };
+        try {
+            const res = await fetch('/api/bookings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                closeModal();
+                await loadData();
+            } else {
+                alert("Failed to synchronize properties to server database endpoint.");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Network error while saving booking.");
+        }
+    }
+
+    function computeExpenses() {
+        const totalCost = parseFloat(document.getElementById('ball-amount').value) || 0;
+        const playerWeights = {};
+        let grandTotalSets = 0;
+
+        loadedBookings.forEach(b => {
+            if (b.players && b.players.length === 4) {
+                b.players.forEach(() => { grandTotalSets++; }); // each player counts as one set occurrence
+                b.players.forEach(p => {
+                    playerWeights[p] = (playerWeights[p] || 0) + 1;
+                });
+            }
+        });
+
+        const container = document.getElementById('expense-rows');
+        container.innerHTML = '';
+
+        if (grandTotalSets === 0) {
+            container.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#6b7280; padding:24px; font-size:14px;">Select a date to track monthly performance parameters.</td></tr>`;
+            return;
+        }
+
+        Object.keys(playerWeights).sort().forEach(player => {
+            const count = playerWeights[player];
+            const fractionalCost = (count / grandTotalSets) * totalCost;
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td style="padding:12px;">👤 ${player}</td>
+                <td style="padding:12px; text-align:center;">${count} Sets</td>
+                <td style="padding:12px; text-align:right;">₹${fractionalCost.toFixed(2)}</td>
+            `;
+            container.appendChild(row);
+        });
+    }
+
+    // initial load
+    loadData();
+</script>
+
